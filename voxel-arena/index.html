@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <script>
+      ;(function () {
+        var stop = function (event) { event.preventDefault() }
+        document.addEventListener('gesturestart', stop, { passive: false })
+        document.addEventListener('gesturechange', stop, { passive: false })
+        document.addEventListener('gestureend', stop, { passive: false })
+        var scrollable = '.menu, .features, .settings, .shop'
+        document.addEventListener('touchstart', function (event) {
+          if (event.touches.length > 1) event.preventDefault()
+        }, { passive: false, capture: true })
+        document.addEventListener('touchmove', function (event) {
+          var target = event.target
+          if (target && target.closest && target.closest(scrollable)) return
+          event.preventDefault()
+        }, { passive: false, capture: true })
+        window.addEventListener('scroll', function () {
+          if (window.scrollX || window.scrollY) window.scrollTo(0, 0)
+        }, { passive: true })
+      })()
+    </script>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta
+      name="description"
+      content="方块战场：开源体素世界里的枪战"
+    />
+    <title>方块战场</title>
+  </head>
+  <body>
+    <script type="module" src="./src/main.ts"></script>
+    <a
+      href="https://github.com/Vyse12138/minecraft-threejs"
+      title="Source on GitHub"
+      class="github"
+      target="_blank"
+      rel="noopener"
+    >
+      <svg width="72" height="72" viewBox="0 0 250 250">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="white"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="white"
+        ></path>
+      </svg>
+    </a>
+    <div class="menu start">
+      <h1 class="title">方块战场</h1>
+      <p class="blurb">爬完虫塔后来到大地图。南边码头，北边石环，东边沙漠，东北雪祠，西边林坛，出生点旁边还有瞭望塔。小地图蓝点「洞」是山洞，里面能挖金矿和钻石，卖掉就能买装备。狐狸喂饱以后，会带你去隐藏的回血泉水。海上有船可以开，也有鱿鱼。地上的黑洞要按「跳」才会掉进去。走到塔、港、墟、林、雪旁边可以进屋。西边有机场，可以开飞机。平板和手机用左下摇杆移动，滑动画面转向，右侧按钮开枪。</p>
+      <button id="play" class="button">开始对战</button>
+      <button id="save" class="button">继续存档</button>
+      <button id="setting" class="button">设置</button>
+      <button id="feature" class="button">操作</button>
+      <button id="exit" class="button">退出</button>
+      <footer class="footer">拼在一起的开源：方块地形 minecraft-threejs，天空和水面 three.js，背包 game-hud，瞄准镜 POLY ARENA，都是 MIT。小人是 KayKit Adventurers（CC0）。塔、磨坊、教堂、水井、木屋、风车是 KayKit Medieval Hexagon（CC0）。带路的狐狸来自 Khronos glTF 示例，模型 CC0，绑定和动画 CC-BY。船、鱿鱼和黑地洞是自己搭的模型。屋里的床、桌椅和灯是 KayKit Furniture Bits（CC0）。海里的鱼、水草和石头来自 Kenney Fish Pack（CC0）。</footer>
+    </div>
+
+    <div class="features hidden">
+      <p>
+        <b>左键</b> 开枪，按住连发只对冲锋枪生效<br />
+        <b>1 / 2 / 3 / 4</b> 步枪、霰弹枪、冲锋枪、狙击枪<br />
+        <b>R</b> 换弹<br />
+        <b>C 或右侧「镜」</b> 开瞄准镜。狙击枪会缩得更近。镜片做法参考开源游戏 POLY ARENA（MIT）。<br />
+        <b>按住 X 再左键</b> 挖方块<br />
+        <b>右键</b> 放方块当掩体<br />
+        <b>滚轮或 5-9</b> 换方块<br />
+        <b>WASD</b> 移动，空格跳，Shift 潜行，Q 飞行<br />
+        <b>E</b> 松开鼠标，F 全屏<br />
+        <b>平板和手机</b> 左下摇杆移动，在画面上滑动转向。右侧：枪开枪，跳跳跃，弹换弹，换换枪，挖挖方块，放放方块，块换方块，停暂停。不需要锁定鼠标。<br />
+        <b>大地图</b> 小地图上的黄点是场景：塔、港、墟、沙、林、雪。蓝点「洞」是山洞。挖是按住挖再点方块。<br />
+        <b>矿和宠物</b> 金矿卖 18，钻石卖 40。饲料 20 钱，或一块金矿。靠近狐狸按「喂」或 F，跟着它走，泉水不在地图上，站进去会回血。<br />
+        <b>车</b> 小地图「摩」是摩托车，速度 12.4；「车」是汽车，速度 8.2。走近汽车会提示「进入」，按「开」或 V 上去，再按一次会提示「退出」。车有血条，敌人会把车打坏。<br />
+        <b>海和地洞</b> 北边的海岸会沉进海里，走过去就是水，可以上船。雾后面没有路，不会再走进一块空白的海。海上有鱿鱼。虫子比人慢。站在地上的黑洞里按「跳」才掉进黑地洞，伪人会追过来，杀光以后自动回到地面。<br />
+        <b>滑梯</b> 右下角大按钮「爬梯」。按住就一直往上，没有顶，松手停。到任意高度按「跳」或空格，滑轨会转弯、侧倾，像过山车一样转回地面。商店里可以用钱换游侠、法师、蛮人。<br />
+        <b>进屋</b> 靠近瞭望塔、码头、石环、林坛、雪祠，按左上角「进屋」或 H。屋里摆着开源家具。走到南边门口，或再按「出门」。<br />
+        <b>商店</b> 左上角「店」，或点屏幕上方的钱袋。地上亮金色的是金币。金矿、钻石在洞里挖，可以卖掉，金矿也能直接买东西。背心、弹匣、稳镜买一次就一直有效。<br />
+        <b>飞机</b> 小地图「机」是机场。靠近飞机会提示进入，按「开」上去，再按一次提示退出。按住前进加速，再按「起飞」或「跳」，速度会变得很快。抬头爬升，低头下降。仪表显示高度、速度、航向和升降。按「降落」会收油门下降，贴近地面就着陆。<br />
+        <b>变鱼</b> 不坐船，在海上按「跳」就会变成鱼。自己的等级在画面上方，别的鱼头上和左上角小地图也标着等级，红色的比你大。只能吃不比你大的鱼，吃多了会升级变大。按「上岸」，或游到岸边，吃掉几条就增加几个队友，一次最多 12 个。被更大的鱼吃掉会自动上岸，已经吃到的鱼仍会变成队友。<br />
+      </p>
+      <button id="back" class="button">Back</button>
+    </div>
+
+    <div class="settings hidden">
+      <p id="distance">Render Distance: 5</p>
+      <input
+        type="range"
+        id="distance-input"
+        min="1"
+        max="8"
+        value="5"
+        step="1"
+      />
+
+      <p id="fov">Field of View: 70</p>
+      <input
+        type="range"
+        id="fov-input"
+        min="40"
+        max="100"
+        value="70"
+        step="1"
+      />
+
+      <p id="music">Music: On</p>
+      <input type="range" id="music-input" min="0" max="1" value="1" step="1" />
+
+      <br />
+      <br />
+      <button id="setting-back" class="button">Apply</button>
+    </div>
+
+    <div class="save-modal hidden">已保存</div>
+    <div class="load-modal hidden">已读取</div>
+    <div id="radar">
+      <canvas id="minimap" width="140" height="140"></canvas>
+      <p id="sides">我方 1  敌方 0</p>
+      <button id="throw" type="button">雷</button>
+      <button id="feed-pet" type="button">喂</button>
+      <button id="drive" type="button">开</button>
+      <button id="shop-open" type="button">店</button>
+      <button id="takeoff" type="button" hidden>起飞</button>
+      <button id="ashore" type="button" hidden>上岸</button>
+      <button id="enter-house" type="button" hidden>进屋</button>
+      <p id="ride-hint"></p>
+    </div>
+    <button id="purse" type="button" hidden>钱 0  金 0  钻 0</button>
+    <p id="fish-hud" hidden>鱼 Lv.1 米诺  已吃 0</p>
+    <div id="flight" hidden>
+      <div class="flight-row">
+        <b id="flt-mode">滑跑</b>
+        <span id="flt-alt">高度 0m</span>
+        <span id="flt-spd">速度 0</span>
+      </div>
+      <div class="flight-row">
+        <span id="flt-hdg">航向 000</span>
+        <span id="flt-vs">升降 +0</span>
+        <span id="flt-thr">油门 0%</span>
+      </div>
+      <div id="flt-horizon"><div id="flt-line"></div></div>
+      <p id="flt-hint">按住前进加速，再按「起飞」或「跳」</p>
+    </div>
+    <p id="duel">你 100</p>
+    <p id="guide"></p>
+    <p id="slide-state"></p>
+    <button id="ladder" type="button">爬梯</button>
+    <div id="shop" class="shop hidden">
+      <p id="shop-money">钱 0 · 金 0 · 钻 0 · 饲料 0</p>
+      <p class="shop-note">红虫子掉 40 钱，鱿鱼掉 25。地上的金币捡了就进钱袋。洞里的金矿和钻石可以卖掉，金矿也能直接买东西。</p>
+      <p class="shop-label">卖矿</p>
+      <div class="shop-row">
+        <button type="button" data-buy="sell-gold">卖1金 +18</button>
+        <button type="button" data-buy="sell-gold-all">金全卖</button>
+      </div>
+      <div class="shop-row">
+        <button type="button" data-buy="sell-diamond">卖1钻 +40</button>
+        <button type="button" data-buy="sell-diamond-all">钻全卖</button>
+      </div>
+      <p class="shop-label">用什么付</p>
+      <div class="shop-row">
+        <button type="button" id="pay-money" class="on">用钱</button>
+        <button type="button" id="pay-gold">用金矿</button>
+      </div>
+      <p class="shop-label">补给和装备</p>
+      <button type="button" data-buy="feed" data-name="饲料" data-money="20" data-gold="1">饲料 20钱</button>
+      <button type="button" data-buy="med" data-name="治疗" data-money="25" data-gold="2">治疗 25钱</button>
+      <button type="button" data-buy="grenade" data-name="手榴弹" data-money="20" data-gold="2">手榴弹 20钱</button>
+      <button type="button" data-buy="bug" data-name="虫子" data-money="40" data-gold="3">虫子 40钱</button>
+      <button type="button" data-buy="vest" data-name="背心" data-money="40" data-gold="3">背心 40钱</button>
+      <button type="button" data-buy="drum" data-name="弹匣" data-money="30" data-gold="2">弹匣 30钱</button>
+      <button type="button" data-buy="glass" data-name="稳镜" data-money="30" data-gold="2">稳镜 30钱</button>
+      <p class="shop-label">小人</p>
+      <button type="button" data-buy="skin-knight" data-name="骑士" data-money="0" data-gold="0">骑士</button>
+      <button type="button" data-buy="skin-rogue" data-name="游侠" data-money="35" data-gold="2">游侠 35钱</button>
+      <button type="button" data-buy="skin-mage" data-name="法师" data-money="50" data-gold="3">法师 50钱</button>
+      <button type="button" data-buy="skin-barbarian" data-name="蛮人" data-money="70" data-gold="4">蛮人 70钱</button>
+      <button id="shop-close" type="button">关闭</button>
+    </div>
+    <div id="muzzle"></div>
+    <div id="scope-ov">
+      <div class="scope-mask"></div>
+      <div class="scope-ring"></div>
+      <div class="scope-h"></div>
+      <div class="scope-v"></div>
+      <div class="scope-dot"></div>
+    </div>
+    <div id="combat" class="combat hidden">
+      <div class="hp-track"><div id="hp"></div></div>
+      <p id="gun"></p>
+      <p id="ride"></p>
+      <div id="feed"></div>
+      <div id="hitmark"></div>
+    </div>
+  </body>
+</html>

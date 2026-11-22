@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <script>
+      ;(function () {
+        var stop = function (event) { event.preventDefault() }
+        document.addEventListener("gesturestart", stop, { passive: false })
+        document.addEventListener("gesturechange", stop, { passive: false })
+        document.addEventListener("gestureend", stop, { passive: false })
+        var scrollable = "#menu, dialog, .panel"
+        document.addEventListener("touchstart", function (event) {
+          if (event.touches.length > 1) event.preventDefault()
+        }, { passive: false, capture: true })
+        document.addEventListener("touchmove", function (event) {
+          var target = event.target
+          if (target && target.closest && target.closest(scrollable)) return
+          event.preventDefault()
+        }, { passive: false, capture: true })
+        window.addEventListener("scroll", function () {
+          if (window.scrollX || window.scrollY) window.scrollTo(0, 0)
+        }, { passive: true })
+      })()
+    </script>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#140e0c" />
+    <title>虫塔 · 第三座</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./vendor/three.module.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <canvas id="view" aria-describedby="about"></canvas>
+    <p id="about" class="sr">第三人称爬塔。电脑用键盘移动、鼠标环顾。平板和手机用左下摇杆移动，滑动画面转向，右侧按钮开枪和跳跃。</p>
+    <div id="flash"></div>
+    <div id="muzzle"></div>
+    <div id="scope" hidden>
+      <div class="scope-mask"></div>
+      <div class="scope-ring"></div>
+      <div class="scope-h"></div>
+      <div class="scope-v"></div>
+      <div class="scope-dot"></div>
+    </div>
+    <div id="vignette"></div>
+    <div id="ui">
+      <section id="menu" class="panel">
+        <p class="eyebrow">原创爬塔</p>
+        <h1>虫塔</h1>
+        <p class="sub">白天爬塔，开枪打虫子。到顶之后进入大场景对战。平板和手机用摇杆、滑动和右侧按钮。</p>
+        <p id="best" class="best" hidden></p>
+        <div class="actions">
+          <button id="start" type="button">开始攀爬</button>
+          <button id="help-open" type="button" class="ghost">怎么玩</button>
+        </div>
+        <p class="fine">
+          这是一版可以在浏览器里玩的原创塔。虫子从塔心往上追，绿台能躲，黄皮会滑，蓝罐会炸，红傀儡会把你扇下去。没有使用 Roblox 的模型、地图或素材。天空和塔下的海来自 three.js，背包热键栏来自 game-hud，瞄准镜来自 POLY ARENA，都是 MIT。
+        </p>
+      </section>
+      <div id="hud" hidden>
+        <div class="top">
+          <p id="duel" hidden>你 100</p>
+          <p id="floor">第 1 层 / 6</p>
+          <p id="clock">0:00</p>
+          <p id="cocoons">虫茧 0</p>
+        </div>
+        <div id="progress" aria-hidden="true"><span id="progress-fill"></span></div>
+        <p id="hint" class="hint" hidden></p>
+        <p id="near" class="near" hidden>按 E 打开铜盘</p>
+        <div id="warn" class="warn">
+          <div class="warn-track"><span id="warn-fill"></span></div>
+          <p id="warn-text">塔虫还在深处</p>
+        </div>
+        <div class="meters">
+          <p><span>喷气</span><span class="meter"><span id="fuel-fill"></span></span></p>
+          <p id="ammo">步枪 30/120</p>
+          <p id="spores">孢子 0</p>
+          <p id="safe-flag" hidden>安全区</p>
+        </div>
+        <p class="cross" aria-hidden="true"></p>
+        <button id="mute" type="button" class="icon">声音</button>
+      </div>
+      <div id="death" class="banner" hidden><p id="death-text">被塔虫咬住了</p></div>
+      <section id="pause" class="panel slim" hidden>
+        <h2>暂停</h2>
+        <div class="actions">
+          <button id="resume" type="button">继续</button>
+          <button id="help-pause" type="button" class="ghost">怎么玩</button>
+          <button id="quit" type="button" class="ghost">回到门口</button>
+        </div>
+      </section>
+      <section id="win" class="panel" hidden>
+        <p class="eyebrow">铃响了</p>
+        <h2>你爬到顶了</h2>
+        <p id="win-stats"></p>
+        <div class="actions">
+          <button id="to-battle" type="button">进入战场</button>
+          <button id="again" type="button" class="ghost">再爬一次</button>
+          <button id="win-menu" type="button" class="ghost">回到门口</button>
+        </div>
+      </section>
+    </div>
+    <div id="touch" hidden>
+      <div id="stick" aria-hidden="true"><div id="knob"></div></div>
+      <div class="touch-actions">
+        <button type="button" data-act="reload">弹</button>
+        <button type="button" data-act="use">盘</button>
+        <button type="button" data-act="sprint">跑</button>
+        <button type="button" data-act="spore">隐</button>
+        <button type="button" data-act="jet">喷</button>
+        <button type="button" data-act="scope">镜</button>
+        <button type="button" data-act="jump">跳</button>
+        <button type="button" data-act="slap">枪</button>
+      </div>
+    </div>
+    <dialog id="help">
+      <h2>怎么玩</h2>
+      <ul>
+        <li>电脑：WASD 移动，鼠标环顾，左键开枪，右键或 C 开瞄准镜。手机和平板：左下摇杆移动，画面上滑动转向，右侧「枪」开枪，「镜」开瞄准镜。</li>
+        <li>开枪会飞出一颗发光的子弹。甲虫和傀儡会被打倒，塔虫多打几枪会退下去。R 或「弹」换弹。</li>
+        <li>1 到 4 或上方格子换步枪、霰弹、冲锋、狙击。按 B 打开背包，背心挡一次伤害，弹匣加大，稳镜让开镜更准。</li>
+        <li>F 喷气助跳，油要落地才慢慢回来。Q 使用金孢子隐身。</li>
+        <li>绿台是安全区。站一会儿，塔虫会退回下面。</li>
+        <li>第一圈的四块牌子拼出口令。到铜盘前按 E，或点右侧「盘」。</li>
+        <li>碰到塔虫、掉出塔、或在红台上站太久，都会回到上一盏灯。</li>
+      </ul>
+      <form method="dialog"><button type="submit">知道了</button></form>
+    </dialog>
+    <dialog id="pad">
+      <h2>铜盘</h2>
+      <p id="code-view" class="code">____</p>
+      <p id="code-msg"></p>
+      <div id="keys" class="keys"></div>
+      <div class="actions">
+        <button id="code-ok" type="button">确认</button>
+        <button id="code-clear" type="button" class="ghost">清除</button>
+        <button id="code-close" type="button" class="ghost">离开</button>
+      </div>
+    </dialog>
+    <p id="boot">正在点灯……如果一直停在这里，请用本地服务器打开这个文件夹，不要直接双击网页文件。</p>
+    <div id="live" class="sr" aria-live="polite"></div>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

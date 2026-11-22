@@ -1,0 +1,7 @@
+KayKit Character Pack: Adventurers 1.0
+Created by Kay Lousberg (https://kaylousberg.com)
+License: CC0 1.0 Universal
+https://creativecommons.org/publicdomain/zero/1.0/
+
+The knight, rogue, mage, and barbarian models and their animations
+are used for the ladder and slide rider.
